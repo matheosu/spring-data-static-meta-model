@@ -1,2 +1,2 @@
-# spring-data-static-meta-model
-Static MetaModel implementation for Spring Data
+# Spring Meta NoSQL
+Static MetaModel implementation for Spring Data NoSQL
