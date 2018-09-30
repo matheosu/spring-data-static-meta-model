@@ -75,4 +75,7 @@ public class MetaModel {
         return packageName + "." + nameClass;
     }
 
+    public List<Meta> getAttributes() {
+        return attributes;
+    }
 }

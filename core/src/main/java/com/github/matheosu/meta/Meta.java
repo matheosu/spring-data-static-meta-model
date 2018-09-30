@@ -5,6 +5,7 @@ public class Meta {
     private Type type;
     private String value;
     private String field;
+    private String className;
 
     public Meta(Type type) {
         this.type = type;
@@ -32,6 +33,14 @@ public class Meta {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public enum Type {

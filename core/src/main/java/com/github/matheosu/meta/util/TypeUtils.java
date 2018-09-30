@@ -18,11 +18,12 @@ public final class TypeUtils {
 
         DeclaredType typeMirror = (DeclaredType) element.asType();
         TypeElement elementSymbol = (TypeElement) typeMirror.asElement();
+        String className = elementSymbol.getQualifiedName().toString();
 
         // Define Type
         Meta meta;
         try {
-            Class clazz = Class.forName(elementSymbol.getQualifiedName().toString());
+            Class clazz = Class.forName(className);
             if (clazz.isPrimitive() || clazz.isEnum() || CharSequence.class.isAssignableFrom(clazz) || UUID.class.isAssignableFrom(clazz)) {
                 meta = new Meta(Meta.Type.ATTRIBUTE);
             } else if (Collection.class.isAssignableFrom(clazz)) {
@@ -36,6 +37,7 @@ public final class TypeUtils {
 
         meta.setField(filedName);
         meta.setValue(filedName);
+        meta.setClassName(className);
 
         return meta;
     }
