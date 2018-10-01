@@ -14,7 +14,8 @@ import javax.lang.model.element.VariableElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,24 +31,32 @@ public class DocumentProcessor extends AbstractProcessor {
             Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
 
-            List<MetaModel> metaModels = annotatedElements.stream()
-                    .map(e -> new MetaModel(e.toString(), e.getEnclosedElements().stream()
-                                                                    .filter(ee -> ElementKind.FIELD.equals(ee.getKind()))
-                                                                    .map(ee -> (VariableElement) ee)
-                                                                    .map(TypeUtils::createFromVariable)
-                                                                    .collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-
+            Set<MetaModel> metaModels = annotatedElements.stream().map(this::getMetaModel).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
             metaModels.forEach(this::writeMetaModel);
 
-            metaModels.stream()
-                    .flatMap(mm -> mm.getAttributes().stream())
-                    .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
-                    .map(Meta::getClassName);
-
+            // Extra Classes
+            Set<MetaModel> extraModels = metaModels.stream()
+                                                             .flatMap(mm -> mm.getAttributes().stream())
+                                                             .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
+                                                             .map(Meta::getClassName)
+                                                             .map(s -> roundEnv.getRootElements().stream()
+                                                                    .filter(e -> e.toString().equals(s))
+                                                                    .findFirst().orElse(null))
+                                                             .filter(Objects::nonNull)
+                                                            .map(this::getMetaModel)
+                                                            .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+            extraModels.forEach(this::writeMetaModel);
         }
 
         return false;
+    }
+
+    private MetaModel getMetaModel(Element e) {
+        return new MetaModel(e.toString(), e.getEnclosedElements().stream()
+                .filter(ee -> ElementKind.FIELD.equals(ee.getKind()))
+                .map(ee -> (VariableElement) ee)
+                .map(TypeUtils::createFromVariable)
+                .collect(Collectors.toList()));
     }
 
     private void writeMetaModel(MetaModel meta) {
