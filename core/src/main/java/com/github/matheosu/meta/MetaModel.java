@@ -2,8 +2,9 @@ package com.github.matheosu.meta;
 
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Objects;
 
-public class MetaModel {
+public class MetaModel implements Comparable<MetaModel>{
 
     private final List<Meta> attributes;
     private String nameClass;
@@ -77,5 +78,23 @@ public class MetaModel {
 
     public List<Meta> getAttributes() {
         return attributes;
+    }
+
+    @Override
+    public int compareTo(MetaModel o) {
+        return referenceClass.compareTo(o.referenceClass);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MetaModel)) return false;
+        MetaModel metaModel = (MetaModel) o;
+        return Objects.equals(referenceClass, metaModel.referenceClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(referenceClass);
     }
 }
