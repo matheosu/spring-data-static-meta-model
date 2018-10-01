@@ -35,17 +35,21 @@ public class DocumentProcessor extends AbstractProcessor {
             metaModels.forEach(this::writeMetaModel);
 
             // Extra Classes
-            Set<MetaModel> extraModels = metaModels.stream()
-                                                             .flatMap(mm -> mm.getAttributes().stream())
-                                                             .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
-                                                             .map(Meta::getClassName)
-                                                             .map(s -> roundEnv.getRootElements().stream()
-                                                                    .filter(e -> e.toString().equals(s))
-                                                                    .findFirst().orElse(null))
-                                                             .filter(Objects::nonNull)
-                                                            .map(this::getMetaModel)
-                                                            .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-            extraModels.forEach(this::writeMetaModel);
+            Set<MetaModel> extraModels = metaModels;
+            do {
+                extraModels = extraModels.stream()
+                        .flatMap(mm -> mm.getAttributes().stream())
+                        .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
+                        .map(Meta::getClassName)
+                        .map(s -> roundEnv.getRootElements().stream()
+                                .filter(e -> e.toString().equals(s))
+                                .findFirst().orElse(null))
+                        .filter(Objects::nonNull)
+                        .map(this::getMetaModel)
+                        .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+                extraModels.forEach(this::writeMetaModel);
+            } while (!extraModels.isEmpty());
+
         }
 
         return false;
