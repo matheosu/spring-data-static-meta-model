@@ -32,7 +32,9 @@ public class DocumentProcessor extends AbstractProcessor {
 
 
             Set<MetaModel> metaModels = annotatedElements.stream().map(this::getMetaModel).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-            metaModels.forEach(this::writeMetaModel);
+
+            Set<MetaModel> models = new LinkedHashSet<>();
+            models.addAll(metaModels);
 
             // Extra Classes
             Set<MetaModel> extraModels = metaModels;
@@ -47,8 +49,13 @@ public class DocumentProcessor extends AbstractProcessor {
                         .filter(Objects::nonNull)
                         .map(this::getMetaModel)
                         .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-                extraModels.forEach(this::writeMetaModel);
+
+                models.addAll(extraModels);
             } while (!extraModels.isEmpty());
+
+
+
+            models.forEach(this::writeMetaModel);
 
         }
 
