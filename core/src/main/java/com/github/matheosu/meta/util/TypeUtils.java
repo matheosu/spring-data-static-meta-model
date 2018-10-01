@@ -24,7 +24,9 @@ public final class TypeUtils {
         Meta meta;
         try {
             Class clazz = Class.forName(className);
-            if (clazz.isPrimitive() || clazz.isEnum() || CharSequence.class.isAssignableFrom(clazz) || UUID.class.isAssignableFrom(clazz)) {
+            if (clazz.isPrimitive() || clazz.isEnum() ||
+                    Number.class.isAssignableFrom(clazz) || Boolean.class.getName().equals(className) ||
+                    CharSequence.class.isAssignableFrom(clazz) || UUID.class.isAssignableFrom(clazz)) {
                 meta = new Meta(Meta.Type.ATTRIBUTE);
             } else if (Collection.class.isAssignableFrom(clazz)) {
                 meta = new Meta(Meta.Type.COLLECTION);
