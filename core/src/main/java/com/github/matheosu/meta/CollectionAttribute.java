@@ -3,8 +3,10 @@ package com.github.matheosu.meta;
 @FunctionalInterface
 public interface CollectionAttribute extends Attribute {
 
-    default String get(Attribute attribute) {
-        return get() + DOT + attribute.get();
+    @SuppressWarnings("unchecked")
+    default <T extends Attribute> T get(T attribute) {
+        Attribute attr = () -> name() + DOT + attribute.name();
+        return (T) attr;
     }
 
 }
