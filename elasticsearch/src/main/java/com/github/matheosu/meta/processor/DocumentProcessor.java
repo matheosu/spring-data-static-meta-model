@@ -33,8 +33,7 @@ public class DocumentProcessor extends AbstractProcessor {
 
             Set<MetaModel> metaModels = annotatedElements.stream().map(this::getMetaModel).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 
-            Set<MetaModel> models = new LinkedHashSet<>();
-            models.addAll(metaModels);
+            Set<MetaModel> models = new LinkedHashSet<>(metaModels);
 
             // Extra Classes
             Set<MetaModel> extraModels = metaModels;
@@ -53,9 +52,19 @@ public class DocumentProcessor extends AbstractProcessor {
                 models.addAll(extraModels);
             } while (!extraModels.isEmpty());
 
-
-
             models.forEach(this::writeMetaModel);
+
+
+            // Arguments in Collections
+            models.stream().flatMap(mm -> mm.getAttributes().stream())
+                    .filter(m -> Meta.Type.COLLECTION.equals(m.getType()))
+                    .map(Meta::getTypeArguments)
+                    .map(s -> roundEnv.getRootElements().stream()
+                            .filter(e -> e.toString().equals(s))
+                            .findFirst().orElse(null)
+                    ).filter(Objects::nonNull)
+                    .map(this::getMetaModel)
+                    .forEach(this::writeMetaModel);
 
         }
 
