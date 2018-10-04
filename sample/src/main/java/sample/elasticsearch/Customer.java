@@ -9,9 +9,9 @@ import java.util.List;
 public class Customer extends Entity {
 
     private String name;
-    private Address address;
     private LocalDateTime birthDate;
 
+    private List<Address> address;
     private List<Event> events;
 
     public String getName() {
@@ -22,14 +22,6 @@ public class Customer extends Entity {
         this.name = name;
     }
 
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(Address address) {
-        this.address = address;
-    }
-
     public LocalDateTime getBirthDate() {
         return birthDate;
     }
@@ -38,4 +30,19 @@ public class Customer extends Entity {
         this.birthDate = birthDate;
     }
 
+    public List<Address> getAddress() {
+        return address;
+    }
+
+    public void setAddress(List<Address> address) {
+        this.address = address;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<Event> events) {
+        this.events = events;
+    }
 }
