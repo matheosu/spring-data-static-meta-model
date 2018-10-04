@@ -31,32 +31,18 @@ public class DocumentProcessor extends AbstractProcessor {
             Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
 
-            Set<MetaModel> metaModels = annotatedElements.stream().map(this::getMetaModel).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-
-            Set<MetaModel> models = new LinkedHashSet<>(metaModels);
+            Set<MetaModel> models = annotatedElements.stream()
+                    .map(this::getMetaModel).sorted()
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             // Extra Classes
-            Set<MetaModel> extraModels = metaModels;
-            do {
-                extraModels = extraModels.stream()
-                        .flatMap(mm -> mm.getAttributes().stream())
-                        .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
-                        .map(Meta::getClassName)
-                        .map(s -> roundEnv.getRootElements().stream()
-                                .filter(e -> e.toString().equals(s))
-                                .findFirst().orElse(null))
-                        .filter(Objects::nonNull)
-                        .map(this::getMetaModel)
-                        .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-
-                models.addAll(extraModels);
-            } while (!extraModels.isEmpty());
+            discoveryExtraClasses(models, roundEnv);
 
             models.forEach(this::writeMetaModel);
 
 
             // Arguments in Collections
-            models.stream().flatMap(mm -> mm.getAttributes().stream())
+            Set<MetaModel> collectionsArgument = models.stream().flatMap(mm -> mm.getAttributes().stream())
                     .filter(m -> Meta.Type.COLLECTION.equals(m.getType()))
                     .map(Meta::getTypeArguments)
                     .map(s -> roundEnv.getRootElements().stream()
@@ -64,11 +50,32 @@ public class DocumentProcessor extends AbstractProcessor {
                             .findFirst().orElse(null)
                     ).filter(Objects::nonNull)
                     .map(this::getMetaModel)
-                    .forEach(this::writeMetaModel);
+                    .sorted()
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            discoveryExtraClasses(collectionsArgument, roundEnv);
+            collectionsArgument.forEach(this::writeMetaModel);
 
         }
 
         return false;
+    }
+
+    private void discoveryExtraClasses(Set<MetaModel> models, RoundEnvironment roundEnv) {
+        // Extra Classes
+        Set<MetaModel> extraModels = models;
+        do {
+            extraModels = extraModels.stream()
+                    .flatMap(mm -> mm.getAttributes().stream())
+                    .filter(m -> Meta.Type.ENTITY.equals(m.getType()))
+                    .map(Meta::getClassName)
+                    .map(s -> roundEnv.getRootElements().stream()
+                            .filter(e -> e.toString().equals(s))
+                            .findFirst().orElse(null))
+                    .filter(Objects::nonNull)
+                    .map(this::getMetaModel)
+                    .sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+            models.addAll(extraModels);
+        } while (!extraModels.isEmpty());
     }
 
     private MetaModel getMetaModel(Element e) {
